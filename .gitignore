@@ -1,0 +1,15 @@
+# Databricks
+.databricks/
+
+# Ambientes virtuais
+.venv/
+
+# Arquivos de ambiente
+.env
+
+# Configurações para o VSCode
+.vscode
+
+# Saídas/artefatos
+raw/
+test/

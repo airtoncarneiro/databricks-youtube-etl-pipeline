@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yt-ingest"
+version = "0.1.0"
+description = "Ingestão assíncrona de metadados do YouTube em NDJSON particionado"
+requires-python = ">=3.10"
+dependencies = ["aiohttp>=3.9"]
+
+[project.scripts]
+yt-ingest = "yt_ingest.cli:main"
