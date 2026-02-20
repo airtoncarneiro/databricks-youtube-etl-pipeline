@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
+"""Pipeline de ingestão do YouTube para NDJSON particionado."""
+
 from __future__ import annotations
 
-import os
 import asyncio
+import os
 from datetime import date
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Optional, Sequence, Union
 
 import aiohttp
 
@@ -18,7 +19,11 @@ from .config import (
 from .utils import utc_iso_now
 from .io_ndjson import NDJSONRotatingWriter
 from .rate_limiter import RateLimiter
-from .youtube_api import channels_list, search_list_videos_of_channel, videos_list_details
+from .youtube_api import (
+    channels_list,
+    search_list_videos_of_channel,
+    videos_list_details,
+)
 
 ChannelRef = Union[str, Sequence[str]]
 
@@ -33,7 +38,8 @@ async def _ingest_single_channel(
     out_dir_videos: str,
     part_size_mb: int,
     max_videos: int,
-):
+) -> None:  # pylint: disable=too-many-arguments
+    """Ingere metadados de um canal em arquivos NDJSON rotativos."""
     w_channels = NDJSONRotatingWriter(out_dir_channels, part_size_mb)
     w_videos = NDJSONRotatingWriter(out_dir_videos, part_size_mb)
 
@@ -114,16 +120,17 @@ async def ingest_from_channel_reference(
     # reservado (descoberta por search de canal)
     handle_or_query: Optional[str] = None,
     max_videos: int = DEFAULT_MAX_VIDEOS,
-):
+) -> None:  # pylint: disable=too-many-arguments
     """
     Fluxo: channels.list → search.list (vídeos) → videos.list → grava NDJSON particionado.
 
     OBS: atualmente `channel_id` é obrigatório (pode ser str ou lista[str]).
          Descoberta por `for_username`/`handle_or_query` pode ser adicionada depois.
     """
-    if not channel_id:
-        raise RuntimeError(
-            "Forneça ao menos `channel_id` (str ou lista de str).")
+    _ = (for_username, handle_or_query)
+
+    if channel_id is None:
+        raise RuntimeError("Forneça ao menos `channel_id` (str ou lista de str).")
 
     ingestion_date = ingestion_date or date.today().isoformat()
 
@@ -136,9 +143,14 @@ async def ingest_from_channel_reference(
     timeout = aiohttp.ClientTimeout(total=None, connect=TIMEOUT_SECS)
     connector = aiohttp.TCPConnector(limit=60, ttl_dns_cache=300)
 
-    # Normaliza para lista
-    channel_ids: List[str] = list(channel_id) if isinstance(
-        channel_id, (list, tuple, set)) else [channel_id]
+    # Normaliza para lista com narrowing explícito para o type checker.
+    if isinstance(channel_id, str):
+        channel_ids: list[str] = [channel_id]
+    else:
+        channel_ids = list(channel_id)
+
+    if not channel_ids:
+        raise RuntimeError("Forneça ao menos `channel_id` (str ou lista de str).")
 
     async with aiohttp.ClientSession(timeout=timeout, connector=connector) as session:
         tasks = [
@@ -153,5 +165,5 @@ async def ingest_from_channel_reference(
             )
             for cid in channel_ids
         ]
-        # Executa com concorrência controlada pelo RateLimiter (HTTP e API lidam com backoff)
+        # Executa com concorrência controlada pelo RateLimiter.
         await asyncio.gather(*tasks)
