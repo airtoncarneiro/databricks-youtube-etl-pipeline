@@ -26,8 +26,8 @@ def build_parser() -> argparse.ArgumentParser:
         description="Ingestão de dados do YouTube para NDJSON particionado (.gz)")
     p.add_argument("--api-key", default=os.getenv("YOUTUBE_API_KEY"),
                    help="YouTube Data API v3 Key (ou env YOUTUBE_API_KEY)")
-    p.add_argument(
-        "--channel-id", help="ID(s) de canal, separado(s) por vírgula ou espaço")
+    p.add_argument("--channel-id", default=os.getenv("YOUTUBE_CHANNEL_IDS"),
+                   help="ID(s) de canal, separado(s) por vírgula ou espaço")
     p.add_argument("--output-root", default=DEFAULT_OUTPUT_ROOT)
     p.add_argument("--ingestion-date", default=None,
                    help="AAAA-MM-DD (default: hoje)")

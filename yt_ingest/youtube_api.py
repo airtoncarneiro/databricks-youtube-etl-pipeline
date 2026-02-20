@@ -69,7 +69,10 @@ async def videos_list_details(
     api_key: str,
     video_ids: List[str],
     *,
-    parts: str = "contentDetails,id,liveStreamingDetails,localizations,recordingDetails,snippet,statistics,status,topicDetails",
+    parts: str = (
+        "contentDetails,id,liveStreamingDetails,localizations,"
+        "recordingDetails,snippet,statistics,status,topicDetails"
+    ),
 ) -> List[Dict[str, Any]]:
     """Busca detalhes de vídeos em lotes via endpoint `videos.list`."""
     if not video_ids:
@@ -78,7 +81,7 @@ async def videos_list_details(
     url = f"{YOUTUBE_API_URL}/videos"
     out: List[Dict[str, Any]] = []
     for i in range(0, len(video_ids), BATCH_SIZE_IDS):
-        chunk = video_ids[i:i + BATCH_SIZE_IDS]
+        chunk = video_ids[i : i + BATCH_SIZE_IDS]
         params = {"id": ",".join(chunk), "part": parts, "key": api_key}
         data = await http_get_json(session, url, params)
         out.extend(data.get("items", []))
