@@ -13,3 +13,7 @@
 # Saídas/artefatos
 raw/
 test/
+
+# Cache do Python
+yt_ingest/__pycache__/
+
