@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+"""Wrappers assíncronos para endpoints da YouTube Data API v3."""
+
 from typing import Any, Dict, List, Optional
 import aiohttp
 
@@ -14,7 +15,7 @@ async def channels_list(
     for_username: Optional[str] = None,
     parts: str = "brandingSettings,id,snippet,statistics",
 ) -> Dict[str, Any]:
-    """youtube.channels().list"""
+    """Consulta metadados de canais via endpoint `channels.list`."""
     url = f"{YOUTUBE_API_URL}/channels"
     params: Dict[str, Any] = {"part": parts, "key": api_key}
     if channel_id:
@@ -32,7 +33,7 @@ async def search_list_videos_of_channel(
     max_videos: int,
     order: str = "date",
 ) -> List[str]:
-    """youtube.search().list para listar vídeos de um canal (sem playlist)."""
+    """Lista IDs de vídeos de um canal via `search.list`."""
     url = f"{YOUTUBE_API_URL}/search"
     video_ids: List[str] = []
     page_token: Optional[str] = None
@@ -70,7 +71,7 @@ async def videos_list_details(
     *,
     parts: str = "contentDetails,id,liveStreamingDetails,localizations,recordingDetails,snippet,statistics,status,topicDetails",
 ) -> List[Dict[str, Any]]:
-    """youtube.videos().list em lote (até 50 IDs por chamada)."""
+    """Busca detalhes de vídeos em lotes via endpoint `videos.list`."""
     if not video_ids:
         return []
 

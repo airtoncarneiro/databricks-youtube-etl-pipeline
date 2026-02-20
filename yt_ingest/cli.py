@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+"""Interface de linha de comando para executar a ingestão."""
+
 import os
 import asyncio
 import argparse
@@ -10,6 +11,7 @@ from .pipeline import ingest_from_channel_reference
 
 
 def _comma_or_space_list(value: str) -> list[str]:
+    """Converte string separada por vírgula/espaço em lista de canais."""
     value = value.strip()
     if not value:
         return []
@@ -19,6 +21,7 @@ def _comma_or_space_list(value: str) -> list[str]:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Monta o parser de argumentos da CLI."""
     p = argparse.ArgumentParser(
         description="Ingestão de dados do YouTube para NDJSON particionado (.gz)")
     p.add_argument("--api-key", default=os.getenv("YOUTUBE_API_KEY"),
@@ -34,7 +37,8 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def main():
+def main() -> None:
+    """Ponto de entrada da CLI e disparo da ingestão assíncrona."""
     parser = build_parser()
     args = parser.parse_args()
 

@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+"""Escrita de NDJSON compactado com rotação aproximada por tamanho."""
+
 import io
 import os
 import gzip
@@ -12,6 +13,7 @@ class NDJSONRotatingWriter:
     """NDJSON .gz com rotação aproximada por tamanho."""
 
     def __init__(self, out_dir: str, part_size_mb: int):
+        """Inicializa buffer em memória e configuração de rotação."""
         self.out_dir = out_dir
         ensure_dir(out_dir)
         self.target_bytes = part_size_mb * 1024 * 1024
@@ -19,7 +21,8 @@ class NDJSONRotatingWriter:
         self.file_index = 0
         self.count = 0
 
-    def _rotate(self):
+    def _rotate(self) -> None:
+        """Persiste o buffer atual em um novo arquivo `.ndjson.gz`."""
         if self.buf.tell() == 0:
             return
         compressed = gzip.compress(self.buf.getvalue())
@@ -29,12 +32,14 @@ class NDJSONRotatingWriter:
         self.file_index += 1
         self.buf = io.BytesIO()
 
-    def write_line(self, obj: Dict[str, Any]):
+    def write_line(self, obj: Dict[str, Any]) -> None:
+        """Serializa uma linha JSON e aciona rotação quando necessário."""
         line = (json.dumps(obj, ensure_ascii=False) + "\n").encode("utf-8")
         self.buf.write(line)
         self.count += 1
         if self.buf.tell() >= self.target_bytes:
             self._rotate()
 
-    def close(self):
+    def close(self) -> None:
+        """Força a persistência dos dados restantes no buffer."""
         self._rotate()

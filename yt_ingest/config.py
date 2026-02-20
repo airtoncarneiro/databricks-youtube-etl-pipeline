@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Constantes de configuração padrão da ingestão do YouTube."""
 
 YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3"
 TIMEOUT_SECS = 30
